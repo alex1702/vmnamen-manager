@@ -1,0 +1,5 @@
+srv1;Mailserver;127.0.0.1
+srv2;Webserver;127.0.0.2
+testvm;Test Maschine;127.0.0.5
+srv3;;
+srv4;;
