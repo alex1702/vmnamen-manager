@@ -31,10 +31,10 @@ struct Vm {
 
 
 impl Serialize for Vm {
+    // Eigene serialize Funktion, damit das Feld 'frei' nicht mit in der csv landet.
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
         where S: Serializer
     {
-        // 3 is the number of fields in the struct.
         let mut state = serializer.serialize_struct("Vm", 3)?;
         state.serialize_field("hostname", &self.hostname)?;
         state.serialize_field("beschreibung", &self.beschreibung)?;
@@ -57,7 +57,6 @@ fn generiere_tabelle(vms: &Vec<Vm>) {
             Cell::new(&vm.beschreibung),
             Cell::new(&vm.ip)]));
         }
-        
         i += 1;
     }
     
@@ -90,12 +89,10 @@ fn lade_csv(file_path: OsString) -> Result<Vec<Vm>, Box<Error>> {
                 _  => false,
             },
         };
-        
         vms.push(vm);  
     }
     
     Ok(vms)
-    
 }
 
 fn speichere_csv(file_path: OsString, vms: &Vec<Vm>) -> Result<(), Box<Error>> {
@@ -110,7 +107,6 @@ fn speichere_csv(file_path: OsString, vms: &Vec<Vm>) -> Result<(), Box<Error>> {
     }
 
     wtr.flush()?;
-    
     Ok(())
 }
 
@@ -151,11 +147,11 @@ fn finde_freie_vm(vms: &Vec<Vm>, id: &mut i32) -> bool {
         }
         *id += 1;
     }
-    println!("id {} vms {}", *id, vms.len());
     if *id == (vms.len() as i32) {
         return false;
     }
-        true
+    println!("Noch verfügbare Hostnamen nach dem erstellen {}.", (vms.len() as i32 - (*id + 1)));
+    true
 }
 
 fn run() -> Result<(), Box<Error>> {
@@ -175,7 +171,7 @@ fn run() -> Result<(), Box<Error>> {
     abfrage_entscheidung(&mut entscheidung);
     while entscheidung != "q" {
         match entscheidung.as_ref() {
-            "c" => {
+            "c" => { // Erstelle neue VM zum nächst freien Hostnamen
                 let mut freie_id = 0;
                 
                 if !finde_freie_vm(&vms, &mut freie_id) {
@@ -208,7 +204,7 @@ fn run() -> Result<(), Box<Error>> {
                 vms[freie_id as usize].frei = false;
                 
             },
-            "d" => {
+            "d" => { // Lösche VM mit der ID
                 print!("Welche VM möchten Sie löschen? (Angabe der ID) ");
                 match abfrage_id(vms.len() as i32) {
                     Some(id) => {
@@ -219,7 +215,7 @@ fn run() -> Result<(), Box<Error>> {
                     _ => continue,
                 }
             },
-            "e" => {
+            "e" => { // Editiere Vm mit der ID
                 print!("Welche VM möchten Sie editieren? (Angabe der ID) ");
                 match abfrage_id(vms.len() as i32) {
                     Some(id) => {
@@ -228,7 +224,7 @@ fn run() -> Result<(), Box<Error>> {
                         let mut beschreibung = String::new();
                         let mut ip = String::new();
                         
-                        print!("Beschreibung[{}] (Enter um die Beschreibung nicht zu ändern.) ", vms[id as usize].beschreibung);
+                        print!("Beschreibung[{}] (Drücke Enter um die Beschreibung nicht zu ändern.) ", vms[id as usize].beschreibung);
                         io::stdout().flush().unwrap();
                         reader.read_line(&mut beschreibung).expect("failed to read line");
                         beschreibung.pop();
@@ -236,7 +232,7 @@ fn run() -> Result<(), Box<Error>> {
                             vms[id as usize].beschreibung = beschreibung;
                         }
                         
-                        print!("IP[{}] (Enter um die IP nicht zu ändern.) ", vms[id as usize].ip);
+                        print!("IP[{}] (Drücke Enter um die IP nicht zu ändern.) ", vms[id as usize].ip);
                         io::stdout().flush().unwrap();
                         reader.read_line(&mut ip).expect("failed to read line");
                         ip.pop();
@@ -247,7 +243,7 @@ fn run() -> Result<(), Box<Error>> {
                     _ => {}
                 }
             },
-            "w" => {
+            "w" => { // Schreibe csv Datei
                 print!("Speichere Datei ab...");
                 io::stdout().flush().unwrap();
                 // Speichere Datei wieder ab.
@@ -262,7 +258,7 @@ fn run() -> Result<(), Box<Error>> {
             _ => println!("Unbekannter Befehl."),
         }
         
-        generiere_tabelle(&vms); // Drucke die Tabelle neu
+        generiere_tabelle(&vms); // Drucke die Tabelle neu auf der Konsole
         abfrage_entscheidung(&mut entscheidung);
     }
 
@@ -283,7 +279,6 @@ fn main() {
     println!("VM-Namen Manager v0.1.0");
     println!("=======================");
     println!();
-    
     
     if let Err(err) = run() {
         println!("{:?}", err);
