@@ -1,5 +1,10 @@
 # vmnamen-manager
+
+[![Build Status](https://travis-ci.org/alex1702/vmnamen-manager.svg?branch=master)](https://travis-ci.org/alex1702/vmnamen-manager)
+
 Ein kleines Programm um die VMNamen per csv Datei zu verwalten.
+
+
 
 Das Skript verwaltet die VM-Namen die in der csv Datei sind.
 Funktionen:
